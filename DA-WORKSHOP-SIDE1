@@ -18,7 +18,6 @@ Welcome to our hands-on workshop! This guide walks you through installing **Olla
 10. [Contributing to Ollama](#contributing-to-ollama)
 11. [License](#license)
 12. [Contact](#contact)
-13. [Appendix: Full Install Script](#appendix-full-install-script)
 
 ---
 
@@ -212,6 +211,7 @@ Ollama is fully **open-source**. You can:
 
 For questions or support, Mail: contact@darion.in
 
+---
 
 ## Final Words
 
