@@ -18,7 +18,6 @@ Welcome to our hands-on workshop! This guide walks you through installing **Olla
 10. [Contributing to Ollama](#contributing-to-ollama)
 11. [License](#license)
 12. [Contact](#contact)
-13. [Appendix: Full Install Script](#appendix-full-install-script)
 
 ---
 
@@ -210,39 +209,7 @@ Ollama is fully **open-source**. You can:
 
 ## Contact
 
-For questions or support, visit: [https://darion.in](https://darion.in)
-
----
-
-## Appendix: Full Install Script
-
-Below is the actual install script used by Ollama (as of June 2025):
-
-```bash
-#!/bin/sh
-set -e
-
-ARCH=$(uname -m)
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-VERSION="latest"
-
-if [ "$ARCH" = "x86_64" ]; then
-  ARCH="amd64"
-elif [ "$ARCH" = "aarch64" ]; then
-  ARCH="arm64"
-fi
-
-echo "Detected architecture: $ARCH"
-echo "Detected OS: $OS"
-
-curl -L "https://ollama.com/download/$OS/$ARCH" -o ollama.tar.gz
-mkdir -p ~/.ollama
-tar -xzf ollama.tar.gz -C ~/.ollama
-sudo mv ~/.ollama/ollama /usr/local/bin/ollama
-rm -rf ~/.ollama ollama.tar.gz
-
-echo "Ollama installed successfully!"
-```
+For questions or support, Mail: contact@darion.in
 
 ---
 
