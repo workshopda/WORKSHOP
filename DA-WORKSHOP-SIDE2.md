@@ -1,4 +1,4 @@
-# Workshop: Building a RAG System with PDF/Text Input for Accurate AI Responses
+# Workshop: Building a RAG System with PDF/Text using Langchain
 
 This guide walks you through creating a **Retrieval-Augmented Generation (RAG)** system where you can feed PDFs or text files into a chatbot, and it responds accurately using your custom data.
 
