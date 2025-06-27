@@ -1,4 +1,4 @@
-# Workshop: Building a RAG System with PDF/Text using Langchain
+# Workshop: Building a RAG System with PDF/Text Input for Accurate AI Responses
 
 This guide walks you through creating a **Retrieval-Augmented Generation (RAG)** system where you can feed PDFs or text files into a chatbot, and it responds accurately using your custom data.
 
@@ -45,7 +45,7 @@ This boosts accuracy, reduces hallucination, and provides context-aware response
 ## System Requirements
 
 * Python 3.9+
-* pip
+* pip or Poetry
 * Git
 * At least 8GB RAM recommended
 
@@ -54,46 +54,55 @@ This boosts accuracy, reduces hallucination, and provides context-aware response
 ## Installation Guide
 
 ```bash
-# Step 1: Clone the repo
-git clone https://github.com/yourname/rag-chatbot.git
-cd rag-chatbot
+# Step 1: Clone the official RAG-FastAPI-LlamaIndex repo
+git clone https://github.com/cespeleta/rag-fastapi-llamaindex.git
+cd rag-fastapi-llamaindex
 
-# Step 2: Create a virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# Step 2: Copy and configure environment variables
+cp .env.example .env
+# Edit `.env` and add your HuggingFace token (if needed)
 
 # Step 3: Install dependencies
-pip install -r requirements.txt
+# Using Poetry:
+poetry install
+poetry shell
 
-# Step 4: Download a supported LLM (via Ollama)
-ollama pull llama3
+# Or using pip (if using venv):
+# python3 -m venv venv
+# source venv/bin/activate
+# pip install -r requirements.txt
 
-# Step 5: Start Ollama (in background or terminal)
-ollama run llama3
+# Step 4: Add your PDFs
+# Place any PDF files you want to query into the ./pdfs directory
 
-# Step 6: Launch your FastAPI server
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+# Step 5: Run the service
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Step 6: (Optional) Using Docker
+make build.docker
+make run.docker
+
+# Step 7: Access the UI and API
+# - FastAPI Swagger UI: http://localhost:8000/docs
+# - Query endpoint: POST http://localhost:8000/api/v1/query/query
 ```
 
 ---
 
 ## PDF/Text File Ingestion
 
-We use `llama-index` or `langchain` to load and chunk your files:
+Using `llama-index` to load and chunk your files:
 
 ```python
-from llama_index import SimpleDirectoryReader
-from llama_index import VectorStoreIndex
+from llama_index import SimpleDirectoryReader, VectorStoreIndex
 
-# Load PDFs or .txt files from the "docs" folder
-documents = SimpleDirectoryReader("docs").load_data()
+# Load PDFs or .txt files from the "pdfs" folder
+documents = SimpleDirectoryReader("pdfs").load_data()
 index = VectorStoreIndex.from_documents(documents)
 
 # Persist the index for querying later
 index.storage_context.persist()
 ```
-
-Store your documents inside a `/docs` folder.
 
 ---
 
@@ -102,7 +111,7 @@ Store your documents inside a `/docs` folder.
 Once your index is built:
 
 ```python
-from llama_index import load_index_from_storage
+from llama_index import load_index_from_storage, StorageContext
 
 storage_context = StorageContext.from_defaults(persist_dir="./storage")
 index = load_index_from_storage(storage_context)
@@ -125,20 +134,21 @@ print(response)
 
 ## Troubleshooting
 
-| Problem                 | Solution                                  |
-| ----------------------- | ----------------------------------------- |
-| Import Errors           | Check `requirements.txt` and install      |
-| Slow Responses          | Use smaller models or better hardware     |
-| "Index Not Found" Error | Make sure `storage_context.persist()` ran |
+| Problem                 | Solution                                     |
+| ----------------------- | -------------------------------------------- |
+| Import Errors           | Check `requirements.txt` or `pyproject.toml` |
+| Slow Responses          | Use smaller models or better hardware        |
+| "Index Not Found" Error | Make sure `storage_context.persist()` ran    |
 
 ---
 
 ## Resources & Links
 
-* [LlamaIndex Docs](https://docs.llamaindex.ai/)
-* [LangChain](https://docs.langchain.com/)
-* [Ollama](https://ollama.com)
-* [FastAPI](https://fastapi.tiangolo.com/)
+* [LlamaIndex](https://github.com/run-llama/llama_index) – Document ingestion and indexing framework.
+* [LangChain](https://github.com/langchain-ai/langchain) – Chain components for RAG, agents, prompts.
+* [FastAPI](https://github.com/fastapi/fastapi) – Web server to expose query endpoints.
+* [Ollama](https://github.com/ollama/ollama) – Local LLM runtime via CLI or Python/JS SDK.
+* [RAG-FastAPI-LlamaIndex (cespeleta)](https://github.com/cespeleta/rag-fastapi-llamaindex) – Full working RAG chatbot repo.
 
 ---
 
@@ -150,4 +160,4 @@ This RAG setup is MIT licensed. Feel free to fork, customize, and build!
 
 ## Contact
 
-Mail: contact@darion.in for support or inquiries.
+Visit [https://darion.in](https://darion.in) for support, updates, or inquiries.
