@@ -160,4 +160,4 @@ This RAG setup is MIT licensed. Feel free to fork, customize, and build!
 
 ## Contact
 
-Visit [https://darion.in](https://darion.in) for support, updates, or inquiries.
+MAIL: contact@darion.in for support or inquiries.
