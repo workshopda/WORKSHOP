@@ -132,4 +132,4 @@ This setup and code are under the **MIT License**.
 
 ## Contact
 
-Email: [contact@darion.in](mail to:contact@darion.in)
+Email: [contact@darion.in]
