@@ -1,142 +1,135 @@
-# Workshop: Easy RAG Chatbot Setup with PDF/Text Input
+# Workshop: RAG Chatbot Setup using Ollama + LangChain + VS Code
 
-This guide simplifies the **Retrieval-Augmented Generation (RAG)** setup for beginners using a light and fast project. You’ll install everything, upload your PDFs or notes, and query them — all in minutes.
+Learn how to create a Retrieval-Augmented Generation (RAG) chatbot using **LangChain**, **Ollama** (with LLaMA models), and **VS Code**. This setup runs locally, uses your own files (PDFs or .txt), and returns accurate, grounded answers.
 
 ---
 
 ## Table of Contents
 
 1. [What is RAG?](#what-is-rag)
-2. [Why Use It?](#why-use-it)
-3. [Requirements](#requirements)
-4. [Quick Setup Using Simple Repo](#quick-setup-using-simple-repo)
-5. [How to Ask Questions from PDF](#how-to-ask-questions-from-pdf)
-6. [Helpful Tools](#helpful-tools)
-7. [Optional: Using LangChain](#optional-using-langchain)
-8. [Common Issues](#common-issues)
-9. [License](#license)
-10. [Contact](#contact)
+2. [Why Ollama + LangChain?](#why-ollama--langchain)
+3. [System Requirements](#system-requirements)
+4. [Step-by-Step Setup](#step-by-step-setup)
+5. [Ingesting PDFs or Text Files](#ingesting-pdfs-or-text-files)
+6. [Asking Questions](#asking-questions)
+7. [Common Errors](#common-errors)
+8. [License](#license)
+9. [Contact](#contact)
 
 ---
 
 ## What is RAG?
 
-**RAG** stands for Retrieval-Augmented Generation. It makes your chatbot smarter by reading your own documents before answering.
+**Retrieval-Augmented Generation (RAG)** enhances language models by combining them with an information retriever. This allows the model to look up relevant info from documents before generating a response.
 
 ---
 
-## Why Use It?
+## Why Ollama + LangChain?
 
-| ✅ Feature       | 📌 Benefit                           |
-| --------------- | ------------------------------------ |
-| Uses your files | Answers only from your PDFs or notes |
-| Offline-ready   | No cloud or external APIs needed     |
-| Works locally   | Runs fully on your computer          |
+* **Ollama**: Run powerful LLaMA models locally — no need for APIs or cloud access.
+* **LangChain**: Chains tools like retrievers, memory, prompts, and agents.
+* **VS Code**: Simple, developer-friendly IDE to run everything smoothly.
 
 ---
 
-## Requirements
+## System Requirements
 
-* Python 3.9 or higher
-* Git
-* Internet (for setup only)
-* At least 8GB RAM recommended
+* macOS, Linux, or Windows with WSL2
+* Python 3.9+
+* Ollama installed and LLaMA model pulled
+* VS Code
+* 8GB+ RAM recommended
 
 ---
 
-## Quick Setup Using Simple Repo
+## Step-by-Step Setup
+
+### 🔹 Step 1: Install Ollama
 
 ```bash
-# Step 1: Clone the beginner-friendly repo
-git clone https://github.com/ChocoPancakes1219/RAG-application-using-LlamaIndex.git
-cd RAG-application-using-LlamaIndex
-
-# Step 2: Install dependencies
-python3 -m venv venv
-source venv/bin/activate
-pip install -r Requirements.txt
-
-# Step 3: Add your documents
-mkdir data
-# Place your PDFs or .txt files in the 'data' folder
-
-# Step 4: Start the chatbot
-python main.py
+curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-🖥 Go to your browser: `http://localhost:8000`
+### 🔹 Step 2: Pull LLaMA3 Model
 
-Ask anything from your document like:
+```bash
+ollama pull llama3
+```
 
-* "What is explained in section 2?"
-* "Summarize chapter 5."
+### 🔹 Step 3: Set Up Project in VS Code
+
+```bash
+git clone https://github.com/langchain-ai/langchain.git
+cd langchain/examples
+mkdir rag_ollama_demo && cd rag_ollama_demo
+```
+
+### 🔹 Step 4: Create Virtual Environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install langchain llama-index pypdf ollama fastapi uvicorn
+```
 
 ---
 
-## How to Ask Questions from PDF
+## Ingesting PDFs or Text Files
+
+### Place files in a `docs/` folder
+
+### Use LangChain to index content
 
 ```python
-from llama_index import SimpleDirectoryReader, VectorStoreIndex
+from langchain.document_loaders import PyPDFLoader
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OllamaEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-documents = SimpleDirectoryReader("data").load_data()
-index = VectorStoreIndex.from_documents(documents)
-index.storage_context.persist()
+loader = PyPDFLoader("docs/sample.pdf")
+documents = loader.load()
+
+splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+chunks = splitter.split_documents(documents)
+
+embeddings = OllamaEmbeddings(model="llama3")
+db = FAISS.from_documents(chunks, embeddings)
 ```
 
-Then:
+---
+
+## Asking Questions
 
 ```python
-query_engine = index.as_query_engine()
-response = query_engine.query("Give an overview of the second topic")
+from langchain.chains import RetrievalQA
+from langchain.llms import Ollama
+
+llm = Ollama(model="llama3")
+qa = RetrievalQA.from_chain_type(llm=llm, retriever=db.as_retriever())
+
+query = "Summarize the second chapter"
+response = qa.run(query)
 print(response)
 ```
 
 ---
 
-## Helpful Tools
+## Common Errors
 
-* [LlamaIndex](https://github.com/run-llama/llama_index)
-* [FastAPI](https://github.com/fastapi/fastapi)
-* [Ollama](https://github.com/ollama/ollama) – Local model runtime
-* [ChocoPancakes1219 Repo](https://github.com/ChocoPancakes1219/RAG-application-using-LlamaIndex)
-
----
-
-## Optional: Using LangChain
-
-If you'd like more control over chains, memory, or custom workflows, you can also integrate [LangChain](https://github.com/langchain-ai/langchain).
-
-LangChain lets you:
-
-* Build advanced prompt chains
-* Use memory and context-aware conversations
-* Combine multiple tools with RAG (e.g., search + summarization)
-
-Install with:
-
-```bash
-pip install langchain
-```
-
----
-
-## Common Issues
-
-| Problem            | Fix                                      |
-| ------------------ | ---------------------------------------- |
-| Can't install deps | Run: `pip install -r Requirements.txt`   |
-| Docs not loading   | Make sure PDFs are inside `/data` folder |
-| Page not opening   | Visit: `http://localhost:8000`           |
+| Problem             | Fix                                        |
+| ------------------- | ------------------------------------------ |
+| LLM not responding  | Ensure Ollama is running with `ollama run` |
+| PDF not loading     | Check file path and file permissions       |
+| Module import error | Run `pip install` inside your virtual env  |
 
 ---
 
 ## License
 
-This project uses the **MIT License** — free to use, modify, and share.
+This setup and code are under the **MIT License**.
 
 ---
 
 ## Contact
 
-Email: [contact@darion.in](mailto:contact@darion.in)
-
+Email: [contact@darion.in](mail to:contact@darion.in)
