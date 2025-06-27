@@ -1,135 +1,152 @@
-# Workshop: RAG Chatbot Setup using Ollama + LangChain + VS Code
+# Workshop: Building a RAG System with PDF/Text Input using LangChain
 
-Learn how to create a Retrieval-Augmented Generation (RAG) chatbot using **LangChain**, **Ollama** (with LLaMA models), and **VS Code**. This setup runs locally, uses your own files (PDFs or .txt), and returns accurate, grounded answers.
+This guide walks you through creating a Retrieval-Augmented Generation (RAG) system where you can feed PDFs or text files into a chatbot, and it responds accurately using your custom data.
 
 ---
 
 ## Table of Contents
 
-1. [What is RAG?](#what-is-rag)
-2. [Why Ollama + LangChain?](#why-ollama--langchain)
-3. [System Requirements](#system-requirements)
-4. [Step-by-Step Setup](#step-by-step-setup)
-5. [Ingesting PDFs or Text Files](#ingesting-pdfs-or-text-files)
-6. [Asking Questions](#asking-questions)
-7. [Common Errors](#common-errors)
-8. [License](#license)
-9. [Contact](#contact)
+1. What is RAG?
+2. Why Use RAG?
+3. System Requirements
+4. Installation Guide
+5. PDF/Text File Ingestion
+6. Running the Chatbot
+7. Customization Tips
+8. Troubleshooting
+9. Resources & Links
+10. License
+11. Contact
 
 ---
 
 ## What is RAG?
 
-**Retrieval-Augmented Generation (RAG)** enhances language models by combining them with an information retriever. This allows the model to look up relevant info from documents before generating a response.
+Retrieval-Augmented Generation (RAG) combines:
+
+* A retriever: Finds relevant chunks from documents (like PDFs, .txt files)
+* A generator: Language model (LLM) that forms an answer using those chunks
+
+This boosts accuracy, reduces hallucination, and provides context-aware responses.
 
 ---
 
-## Why Ollama + LangChain?
+## Why Use RAG?
 
-* **Ollama**: Run powerful LLaMA models locally — no need for APIs or cloud access.
-* **LangChain**: Chains tools like retrievers, memory, prompts, and agents.
-* **VS Code**: Simple, developer-friendly IDE to run everything smoothly.
+| Feature       | Benefit                                     |
+| ------------- | ------------------------------------------- |
+| Accurate      | Answers are backed by your custom documents |
+| Customizable  | Add your own text, docs, or knowledge base  |
+| Local Control | Works without cloud queries                 |
+| Scalable      | Works for students, developers, enterprises |
 
 ---
 
 ## System Requirements
 
-* macOS, Linux, or Windows with WSL2
 * Python 3.9+
-* Ollama installed and LLaMA model pulled
-* VS Code
-* 8GB+ RAM recommended
+* pip or Poetry
+* Git
+* VS Code (or any IDE)
+* 8GB RAM or more recommended
 
 ---
 
-## Step-by-Step Setup
+## Installation Guide (VS Code)
 
-### 🔹 Step 1: Install Ollama
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
-
-### 🔹 Step 2: Pull LLaMA3 Model
+### Step 1: Clone the Repository
 
 ```bash
-ollama pull llama3
+git clone https://github.com/workshopda/rag.py.git
+cd rag.py
 ```
 
-### 🔹 Step 3: Set Up Project in VS Code
-
-```bash
-git clone https://github.com/langchain-ai/langchain.git
-cd langchain/examples
-mkdir rag_ollama_demo && cd rag_ollama_demo
-```
-
-### 🔹 Step 4: Create Virtual Environment
+### Step 2: Set Up Environment and Install Dependencies
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install langchain llama-index pypdf ollama fastapi uvicorn
+
+pip install langchain-community chromadb sentence-transformers pypdf unstructured python-docx
+```
+
+### Step 3: Prepare Data Directory
+
+```bash
+mkdir data
+# Add your files into data/ (e.g., data.txt, notes.pdf, etc.)
 ```
 
 ---
 
-## Ingesting PDFs or Text Files
+## PDF/Text File Ingestion
 
-### Place files in a `docs/` folder
-
-### Use LangChain to index content
+Using `rag.py`, the script supports `.txt`, `.pdf`, and `.docx` files using `llama_index` and LangChain loaders:
 
 ```python
-from langchain.document_loaders import PyPDFLoader
-from langchain.vectorstores import FAISS
-from langchain.embeddings import OllamaEmbeddings
+from langchain_community.document_loaders import TextLoader, PyPDFLoader, UnstructuredWordDocumentLoader
+```
+
+All files should be placed in the `/data` folder. The script will automatically load and chunk them using:
+
+```python
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-loader = PyPDFLoader("docs/sample.pdf")
-documents = loader.load()
-
-splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-chunks = splitter.split_documents(documents)
-
-embeddings = OllamaEmbeddings(model="llama3")
-db = FAISS.from_documents(chunks, embeddings)
 ```
 
 ---
 
-## Asking Questions
+## Running the Chatbot
 
-```python
-from langchain.chains import RetrievalQA
-from langchain.llms import Ollama
+To run the chatbot:
 
-llm = Ollama(model="llama3")
-qa = RetrievalQA.from_chain_type(llm=llm, retriever=db.as_retriever())
-
-query = "Summarize the second chapter"
-response = qa.run(query)
-print(response)
+```bash
+python rag.py
 ```
+
+You can now ask questions in the terminal like:
+
+* "What does this document talk about?"
+* "Summarize the second paragraph."
+* Type `exit` to stop.
 
 ---
 
-## Common Errors
+## Customization Tips
 
-| Problem             | Fix                                        |
-| ------------------- | ------------------------------------------ |
-| LLM not responding  | Ensure Ollama is running with `ollama run` |
-| PDF not loading     | Check file path and file permissions       |
-| Module import error | Run `pip install` inside your virtual env  |
+* Replace `tinyllama` with any available Ollama model (e.g., `llama2`, `mistral`)
+* Edit `chunk_size` and `chunk_overlap` in `RecursiveCharacterTextSplitter`
+* Expand sources to web pages, CSVs, or APIs
+* Customize prompt templates via LangChain chains
+
+---
+
+## Troubleshooting
+
+| Problem            | Solution                                      |
+| ------------------ | --------------------------------------------- |
+| Import Errors      | Reinstall missing package using `pip install` |
+| No documents found | Ensure files are in `data/` folder            |
+| LLM not responding | Make sure `ollama run tinyllama` is active    |
+
+---
+
+## Resources & Links
+
+* [https://github.com/jerryjliu/llama\_index](https://github.com/jerryjliu/llama_index)
+* [https://github.com/langchain-ai/langchain](https://github.com/langchain-ai/langchain)
+* [https://github.com/tiangolo/fastapi](https://github.com/tiangolo/fastapi)
+* [https://github.com/ollama/ollama](https://github.com/ollama/ollama)
+* [https://github.com/workshopda/rag.py](https://github.com/workshopda/rag.py)
 
 ---
 
 ## License
 
-This setup and code are under the **MIT License**.
+This RAG setup is open source under the MIT License. Fork, modify, and build your own AI tools!
 
 ---
 
 ## Contact
 
-Email: [contact@darion.in]
+Mail: [contact@darion.in](mailto:contact@darion.in)
+
