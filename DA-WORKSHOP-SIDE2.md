@@ -1,163 +1,142 @@
-# Workshop: Building a RAG System with PDF/Text Input using langchain
+# Workshop: Easy RAG Chatbot Setup with PDF/Text Input
 
-This guide walks you through creating a **Retrieval-Augmented Generation (RAG)** system where you can feed PDFs or text files into a chatbot, and it responds accurately using your custom data.
+This guide simplifies the **Retrieval-Augmented Generation (RAG)** setup for beginners using a light and fast project. You’ll install everything, upload your PDFs or notes, and query them — all in minutes.
 
 ---
 
 ## Table of Contents
 
 1. [What is RAG?](#what-is-rag)
-2. [Why Use RAG?](#why-use-rag)
-3. [System Requirements](#system-requirements)
-4. [Installation Guide](#installation-guide)
-5. [PDF/Text File Ingestion](#pdftext-file-ingestion)
-6. [Running the Chatbot](#running-the-chatbot)
-7. [Customization Tips](#customization-tips)
-8. [Troubleshooting](#troubleshooting)
-9. [Resources & Links](#resources--links)
-10. [License](#license)
-11. [Contact](#contact)
+2. [Why Use It?](#why-use-it)
+3. [Requirements](#requirements)
+4. [Quick Setup Using Simple Repo](#quick-setup-using-simple-repo)
+5. [How to Ask Questions from PDF](#how-to-ask-questions-from-pdf)
+6. [Helpful Tools](#helpful-tools)
+7. [Optional: Using LangChain](#optional-using-langchain)
+8. [Common Issues](#common-issues)
+9. [License](#license)
+10. [Contact](#contact)
 
 ---
 
 ## What is RAG?
 
-**Retrieval-Augmented Generation (RAG)** combines:
-
-* A **retriever**: Finds relevant chunks from documents (like PDFs, .txt)
-* A **generator**: Language model (LLM) that forms an answer using those chunks
-
-This boosts accuracy, reduces hallucination, and provides context-aware responses.
+**RAG** stands for Retrieval-Augmented Generation. It makes your chatbot smarter by reading your own documents before answering.
 
 ---
 
-## Why Use RAG?
+## Why Use It?
 
-| Feature       | Benefit                                    |
-| ------------- | ------------------------------------------ |
-| Accurate      | Answers are backed by your data            |
-| Customizable  | Add your own text, docs, or knowledge base |
-| Local Control | Works without sending queries to cloud     |
-| Scalable      | Useful for enterprise, education, and devs |
+| ✅ Feature       | 📌 Benefit                           |
+| --------------- | ------------------------------------ |
+| Uses your files | Answers only from your PDFs or notes |
+| Offline-ready   | No cloud or external APIs needed     |
+| Works locally   | Runs fully on your computer          |
 
 ---
 
-## System Requirements
+## Requirements
 
-* Python 3.9+
-* pip or Poetry
+* Python 3.9 or higher
 * Git
+* Internet (for setup only)
 * At least 8GB RAM recommended
 
 ---
 
-## Installation Guide
+## Quick Setup Using Simple Repo
 
 ```bash
-# Step 1: Clone the official RAG-FastAPI-LlamaIndex repo
-git clone https://github.com/cespeleta/rag-fastapi-llamaindex.git
-cd rag-fastapi-llamaindex
+# Step 1: Clone the beginner-friendly repo
+git clone https://github.com/ChocoPancakes1219/RAG-application-using-LlamaIndex.git
+cd RAG-application-using-LlamaIndex
 
-# Step 2: Copy and configure environment variables
-cp .env.example .env
-# Edit `.env` and add your HuggingFace token (if needed)
+# Step 2: Install dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r Requirements.txt
 
-# Step 3: Install dependencies
-# Using Poetry:
-poetry install
-poetry shell
+# Step 3: Add your documents
+mkdir data
+# Place your PDFs or .txt files in the 'data' folder
 
-# Or using pip (if using venv):
-# python3 -m venv venv
-# source venv/bin/activate
-# pip install -r requirements.txt
-
-# Step 4: Add your PDFs
-# Place any PDF files you want to query into the ./pdfs directory
-
-# Step 5: Run the service
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-# Step 6: (Optional) Using Docker
-make build.docker
-make run.docker
-
-# Step 7: Access the UI and API
-# - FastAPI Swagger UI: http://localhost:8000/docs
-# - Query endpoint: POST http://localhost:8000/api/v1/query/query
+# Step 4: Start the chatbot
+python main.py
 ```
+
+🖥 Go to your browser: `http://localhost:8000`
+
+Ask anything from your document like:
+
+* "What is explained in section 2?"
+* "Summarize chapter 5."
 
 ---
 
-## PDF/Text File Ingestion
-
-Using `llama-index` to load and chunk your files:
+## How to Ask Questions from PDF
 
 ```python
 from llama_index import SimpleDirectoryReader, VectorStoreIndex
 
-# Load PDFs or .txt files from the "pdfs" folder
-documents = SimpleDirectoryReader("pdfs").load_data()
+documents = SimpleDirectoryReader("data").load_data()
 index = VectorStoreIndex.from_documents(documents)
-
-# Persist the index for querying later
 index.storage_context.persist()
 ```
 
----
-
-## Running the Chatbot
-
-Once your index is built:
+Then:
 
 ```python
-from llama_index import load_index_from_storage, StorageContext
-
-storage_context = StorageContext.from_defaults(persist_dir="./storage")
-index = load_index_from_storage(storage_context)
 query_engine = index.as_query_engine()
-
-response = query_engine.query("What is the purpose of this document?")
+response = query_engine.query("Give an overview of the second topic")
 print(response)
 ```
 
 ---
 
-## Customization Tips
+## Helpful Tools
 
-* Replace `llama3` with another model if needed
-* Modify `chunk_size` and `chunk_overlap` for better recall
-* Integrate with Gradio or Streamlit for UI
-* Add `.env` support for configurations
-
----
-
-## Troubleshooting
-
-| Problem                 | Solution                                     |
-| ----------------------- | -------------------------------------------- |
-| Import Errors           | Check `requirements.txt` or `pyproject.toml` |
-| Slow Responses          | Use smaller models or better hardware        |
-| "Index Not Found" Error | Make sure `storage_context.persist()` ran    |
+* [LlamaIndex](https://github.com/run-llama/llama_index)
+* [FastAPI](https://github.com/fastapi/fastapi)
+* [Ollama](https://github.com/ollama/ollama) – Local model runtime
+* [ChocoPancakes1219 Repo](https://github.com/ChocoPancakes1219/RAG-application-using-LlamaIndex)
 
 ---
 
-## Resources & Links
+## Optional: Using LangChain
 
-* [LlamaIndex](https://github.com/run-llama/llama_index) – Document ingestion and indexing framework.
-* [LangChain](https://github.com/langchain-ai/langchain) – Chain components for RAG, agents, prompts.
-* [FastAPI](https://github.com/fastapi/fastapi) – Web server to expose query endpoints.
-* [Ollama](https://github.com/ollama/ollama) – Local LLM runtime via CLI or Python/JS SDK.
-* [RAG-FastAPI-LlamaIndex (cespeleta)](https://github.com/cespeleta/rag-fastapi-llamaindex) – Full working RAG chatbot repo.
+If you'd like more control over chains, memory, or custom workflows, you can also integrate [LangChain](https://github.com/langchain-ai/langchain).
+
+LangChain lets you:
+
+* Build advanced prompt chains
+* Use memory and context-aware conversations
+* Combine multiple tools with RAG (e.g., search + summarization)
+
+Install with:
+
+```bash
+pip install langchain
+```
+
+---
+
+## Common Issues
+
+| Problem            | Fix                                      |
+| ------------------ | ---------------------------------------- |
+| Can't install deps | Run: `pip install -r Requirements.txt`   |
+| Docs not loading   | Make sure PDFs are inside `/data` folder |
+| Page not opening   | Visit: `http://localhost:8000`           |
 
 ---
 
 ## License
 
-This RAG setup is MIT licensed. Feel free to fork, customize, and build!
+This project uses the **MIT License** — free to use, modify, and share.
 
 ---
 
 ## Contact
 
-MAIL: contact@darion.in for support or inquiries.
+Email: [contact@darion.in](mailto:contact@darion.in)
+
